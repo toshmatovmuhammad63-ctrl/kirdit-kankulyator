@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Kredit Kalkulyator</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#0f172a;
+  font-family:Arial,sans-serif;
+}
+.card{
+  background:#020617;
+  width:100%;
+  max-width:460px;
+  padding:20px;
+  border-radius:18px;
+  box-shadow:0 20px 50px rgba(0,0,0,.7);
+  color:white;
+}
+h2{text-align:center;margin-bottom:10px;}
+input,button{
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  font-size:15px;
+  border-radius:10px;
+  border:none;
+}
+button{
+  background:#22c55e;
+  color:#022c22;
+  font-weight:bold;
+}
+.small{background:#334155;color:white;}
+#natija{
+  margin-top:12px;
+  padding:12px;
+  background:#020617;
+  border:2px solid #22c55e;
+  border-radius:14px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+  font-size:13px;
+}
+th,td{
+  border:1px solid #334155;
+  padding:6px;
+  text-align:center;
+}
+th{background:#0b1220;color:#22c55e;}
+tr:nth-child(even){background:#0b1220;}
+.actions{
+  display:flex;
+  gap:6px;
+  margin-top:8px;
+}
+.actions button{flex:1;font-size:13px;}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>🏦 Kredit Kalkulyator</h2>
+
+<button class="small" onclick="document.getElementById('foiz').value=18">Ipoteka 18%</button>
+<button class="small" onclick="document.getElementById('foiz').value=22">Avtokredit 22%</button>
+
+<input type="number" id="summa" placeholder="Summa">
+<input type="number" id="foiz" placeholder="Foiz (%)">
+<input type="number" id="oy" placeholder="Oy">
+
+<button onclick="hisobla()">Hisoblash</button>
+
+<div id="natija"></div>
+
+<div class="actions">
+  <button class="small" onclick="exportExcel()">Excel</button>
+  <button class="small" onclick="exportPDF()">PDF</button>
+</div>
+
+<!-- 📞 TELEFON (HISOBLASHGA TEGMAYDI) -->
+<div style="
+  margin-top:20px;
+  padding-top:12px;
+  border-top:1px solid #334155;
+  text-align:center;
+">
+  <a href="tel:+998998520895"
+     style="display:block;color:#22c55e;font-weight:bold;text-decoration:none;">
+    📞 +998 99 852 08 95
+  </a>
+
+  <a href="https://instagram.com/O1ybe"
+     target="_blank"
+     style="display:block;margin-top:6px;color:#f472b6;font-weight:bold;text-decoration:none;">
+    📸 Instagram: O1ybe
+  </a>
+</div>
+
+</div>
+
+<script>
+function hisobla() {
+  var s = Number(document.getElementById("summa").value);
+  var f = Number(document.getElementById("foiz").value);
+  var o = Number(document.getElementById("oy").value);
+
+  var m = f / 100 / 12;
+  var r = (s * m) / (1 - Math.pow(1 + m, -o));
+  var jami = r * o;
+
+  var html =
+    "<b>Oylik:</b> " + Math.round(r).toLocaleString("uz-UZ") + " so‘m<br>" +
+    "<b>Jami:</b> " + Math.round(jami).toLocaleString("uz-UZ") + " so‘m";
+
+  html += "<table id='jadval'><tr><th>Oy</th><th>Foiz %</th><th>Oylik</th></tr>";
+  for(var i=1;i<=o;i++){
+    html += "<tr><td>"+i+"</td><td>"+f+"</td><td>"+
+      Math.round(r).toLocaleString("uz-UZ")+"</td></tr>";
+  }
+  html += "</table>";
+
+  document.getElementById("natija").innerHTML = html;
+}
+
+function exportExcel(){
+  var table = document.getElementById("jadval");
+  if(!table) return alert("Avval hisoblang");
+  XLSX.writeFile(XLSX.utils.table_to_book(table,{sheet:"Kredit"}),"kredit_jadval.xlsx");
+}
+
+function exportPDF(){
+  var table = document.getElementById("jadval");
+  if(!table) return alert("Avval hisoblang");
+  const { jsPDF } = window.jspdf;
+  var pdf = new jsPDF();
+  pdf.text("Kredit Jadvali",10,10);
+  pdf.html(table,{x:10,y:20,callback:function(){
+    pdf.save("kredit_jadval.pdf");
+  }});
+}
+</script>
+
+</body>
+</html>
